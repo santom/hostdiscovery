@@ -61,7 +61,9 @@ public class ARPUtil {
 	
 	public static void main(String[] args) {
 		
-		readARP();
+		QueryVendor qv = new QueryVendor();
+		HashMap<String, String> map = readARP();
+		System.out.println(qv.getVendor("e0:f8:47:17:92:70"));
 	}
 
 }
