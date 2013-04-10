@@ -59,9 +59,5 @@ public class ARPUtil {
 		return map;
 	}
 	
-	public static void main(String[] args) {
-		
-		readARP();
-	}
 
 }

@@ -15,11 +15,11 @@ public class HostDiscovery {
     static int progress = 0;
     String low = null;
     String high = null;
-    AsyncTask<Object[], Integer, Void> hd = null;
+   // AsyncTask<Object[], Integer, Void> hd = null;
     static boolean started = false;
     static boolean scanned = false;
     networkInfo ni;
-    DiscoveryDBAdapter discoverydb;
+   // DiscoveryDBAdapter discoverydb;
     
     /**
      * Constructor
@@ -37,18 +37,15 @@ public class HostDiscovery {
     public void init()
     {
         reset();
-        discoverydb = new DiscoveryDBAdapter(nsandroid.defaultInstance);
-        discoverydb.open();
+     //  discoverydb = new DiscoveryDBAdapter(nsandroid.defaultInstance);
+    //    discoverydb.open();
         
-        if(ni==null || ni.isConnected() == false) {
+        if(ni==null) {
             String result = "Error in getting Network Information\n Make sure you are connected to atleast one network interface.";
-            nsandroid.resultPublish(result);
-            Toast.makeText(nsandroid.defaultInstance, result, Toast.LENGTH_LONG);
         }
         else {
             countPossibleHosts = ni.getNodes();
             setTotalHosts(getMode());
-            nsandroid.resultPublish(Integer.toString(totalHosts));
             possibleHosts = ni.getRange();
             discoveredHosts = new String[countPossibleHosts];
             low = possibleHosts[0];
@@ -94,7 +91,6 @@ public class HostDiscovery {
         
         if(started == true) {
             String result = "Please wait for the current scan to finish or press stop.";
-            nsandroid.makeToast(result);
             return;
         }
         
@@ -155,11 +151,11 @@ public class HostDiscovery {
         discoveredHosts = null;
         low = null;
         high = null;
-        hd = null;
+        //hd = null;
         started = false;
         scanned = false;
         progress = 0;
-        nsandroid.resetList(); 
+       // nsandroid.resetList(); 
     }
     
     
