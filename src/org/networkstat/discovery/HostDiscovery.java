@@ -2,9 +2,8 @@ package org.networkstat.discovery;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class HostDiscovery {    
-
-
+public class HostDiscovery {
+	
 	String[] possiblenodes;
 	ExecutorService threadPool;
 
@@ -14,12 +13,11 @@ public class HostDiscovery {
 	 */
 	public HostDiscovery(String[] possible) {    	
 		this.possiblenodes = possible;
-		threadPool = Executors.newFixedThreadPool(50); 
+		threadPool = Executors.newFixedThreadPool(100); 
 	}
 
 	// This function starts scanning the entire range of the network
 	public void startScan(){ 
-
 		if(this.possiblenodes != null){
 			for (String ip: possiblenodes){
 				HostPinger hp = new HostPinger(ip);
@@ -27,5 +25,8 @@ public class HostDiscovery {
 			}
 		}
 	}
-
+	
+	public void stop() {
+		threadPool.shutdownNow();
+	}
 }

@@ -43,13 +43,16 @@ public class NetworkStat {
 		discoverer.startScan();
 		
 		PacketSniffer sniffer = new PacketSniffer();
-		HashMap<String, HOST_TYPE> osMap = sniffer.startSniffing(ninfo.getIp(), ninfo.getDevice(), 1000);
+		HashMap<String, HOST_TYPE> osMap = 
+				sniffer.startSniffing(ninfo.getIp(), ninfo.getDevice(), 1000);
 
 		ARPUtil arpreader = new ARPUtil();
 		HashMap<String, String> macMap = arpreader.readARP();
+		System.out.println("Found: " + macMap.size());
 		for(Entry<String, String> entry: macMap.entrySet()) {
 			System.out.println(entry.getKey() + ": " + " : " + osMap.get(entry.getKey()) + " : " + entry.getValue());
 		}
+		discoverer.stop();
 	}
 	
 	private static void clearCache()
