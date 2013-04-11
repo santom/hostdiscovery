@@ -1,9 +1,11 @@
 package org.networkstat.discovery;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
@@ -130,9 +132,12 @@ public class NetworkStat {
 			}                                                                                                                                              
 
 		case WINDOWS:
-			try {
+			try {		
+				
+				
 				p = Runtime.getRuntime().exec("netsh interface ip delete arpcache");
 				System.out.println("Cache cleared.");
+				
 				break;
 			} catch (IOException e) {
 				e.printStackTrace();

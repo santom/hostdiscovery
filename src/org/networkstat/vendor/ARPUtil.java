@@ -3,6 +3,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 
 import org.networkstat.util.OSUtil;
@@ -49,6 +50,32 @@ public class ARPUtil {
 			break;
 		
 		case WINDOWS:
+			Process p;
+			try {
+				p = Runtime.getRuntime().exec("arp -a");
+				BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
+				String line;
+				while ((line = stdInput.readLine()) != null) {
+					if(line.toLowerCase().contains("dynamic"))
+					{
+						line = line.replaceAll(" +"," ");
+						String[] tags = line.trim().split(" ");
+						String ip = tags[0];
+						ip = ip.trim();
+						String mac = tags[1];
+						mac = mac.trim();
+						mac = mac.replaceAll("-",":");
+						if (mac.matches("..:..:..:..:..:..") && !mac.equals("00:00:00:00:00:00")) {
+							map.put(ip, mac);
+//							System.out.println("IP: " + ip + " MAC: " + mac);
+						}
+						
+					}
+				}
+				System.out.println("Cache cleared.");
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+			}
 			break;
 		case MAC:
 			break;
