@@ -53,8 +53,6 @@ public class ARPUtil {
 		case MAC:
 			break;
 		}
-		
-
 
 		return map;
 	}

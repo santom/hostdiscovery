@@ -146,7 +146,7 @@ public class SubnetUtils {
 
         public String[] getAllAddresses() {
             String[] addresses = new String[getAddressCount()];
-            nsandroid.resultPublish("Low: " + Integer.toString(low()) + "High: " + Integer.toString(high()));
+          //  nsandroid.resultPublish("Low: " + Integer.toString(low()) + "High: " + Integer.toString(high()));
             for (int add = low(), j=0; add <= high(); ++add, ++j) {
                 addresses[j] = format(toArray(add));
             }
