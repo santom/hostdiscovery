@@ -1,7 +1,6 @@
 package org.networkstat.discovery;
 
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 
 public class HostPinger implements Runnable{
 	
@@ -17,7 +16,7 @@ public class HostPinger implements Runnable{
 		// TODO Auto-generated method stub
 		try {
 			InetAddress iaddr = InetAddress.getByName(ipaddress_to_ping);
-			iaddr.isReachable(2000);			
+			System.out.println("Checking... " + ipaddress_to_ping + ": " + iaddr.isReachable(2000));			
 			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
