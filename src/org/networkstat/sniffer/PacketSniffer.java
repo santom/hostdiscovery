@@ -1,5 +1,6 @@
 package org.networkstat.sniffer;
 
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 
 import org.jnetpcap.Pcap;
@@ -8,16 +9,18 @@ import org.jnetpcap.PcapIf;
 import org.jnetpcap.packet.PcapPacket;
 import org.jnetpcap.packet.PcapPacketHandler;
 import org.jnetpcap.packet.format.FormatUtils;
-import org.jnetpcap.protocol.lan.Ethernet;
 import org.jnetpcap.protocol.network.Ip4;
-import org.jnetpcap.protocol.network.Ip6;
 import org.jnetpcap.protocol.tcpip.Udp;
 import org.networkstat.discovery.NetworkStat;
 
 public class PacketSniffer {
 	
+	//Apple
 	private static int MDNS = 5353;
+	
+	//Windows
 	private static int LLMNR = 5355;
+	private static int SSDP = 1900;
 
 	
 	public HashMap<String, NetworkStat.HOST_TYPE> startSniffing(String deviceIP, PcapIf device, int packets) {
@@ -53,11 +56,7 @@ public class PacketSniffer {
 			return null;		
 		}
 
-
-		final Ethernet eth = new Ethernet();
 		final Ip4 ip4 = new Ip4();
-		final Ip6 ip6 = new Ip6();
-//		final Html html = new Html();
 		final Udp udp = new Udp();
 
 
@@ -65,48 +64,61 @@ public class PacketSniffer {
 
 			byte[] destination = new byte[4];
 			byte[] source = new byte[4];
-			byte[] destination6 = new byte[16];
-			byte[] source6 = new byte[16];
+
 			int totalPackets = 0;
-			int udpPackets = 0;
+			
 			public void nextPacket(PcapPacket packet, String user) {
 				totalPackets ++;
+				if(totalPackets % 100 == 0) {
+					System.out.println("Sniffed " + totalPackets + " packets");
+				}
 				
 				if(packet.hasHeader(udp)) {
 					if (packet.hasHeader(ip4)) {
 						source = ip4.source();
 						destination = ip4.destination();
 						String sourceIP = FormatUtils.ip(source);
-						String destinationIP = FormatUtils.ip(destination);
-//						System.out.println("#" + totalPackets +  ": from " + sourceIP + " to " + destinationIP);
-//						System.out.println("#" + udpPackets + ": from "+  udp.source() + " to " + udp.destination());
+						String destinationIP = FormatUtils.ip(destination);						
 						if(udp.destination() == MDNS) {
-//							System.out.println("from " + sourceIP + " to " + destinationIP);
-//							System.out.println("from "+  udp.source() + " to " + udp.destination());
-//							int len = udp.getPayloadLength();
-//							byte[] buffer = new byte[10];
-////							
-////							udp.transferPayloadTo(buffer);
-////							System.out.println("meow : " + Arrays.toString(buffer));
-////							System.out.println("hex : " + bytesToHex(buffer));
-//							try {
-//								System.out.println("testing " + new String(buffer, "UTF-8"));
-//							} catch (UnsupportedEncodingException e) {
-//								// TODO Auto-generated catch block
-//								e.printStackTrace();
-//							}
-//							System.out.println(sourceIP + ": Apple");
-							osMap.put(sourceIP, NetworkStat.HOST_TYPE.APPLE);
+							int len = udp.getPayloadLength();
+							byte[] buffer = new byte[len];
+
+							udp.transferPayloadTo(buffer);
+							String payload = "";
+							try {
+								payload = new String(buffer, "UTF-8");
+							} catch (UnsupportedEncodingException e) {
+								e.printStackTrace();
+							}
+							payload = payload.replaceAll("[^\\x00-\\x7F]", "");
+							payload = payload.replaceAll("\\p{Cntrl}", "");
+							payload = payload.toLowerCase();
+							
+							NetworkStat.HOST_TYPE host;
+							if(payload.contains("ipod")) host = NetworkStat.HOST_TYPE.IPOD;
+							else if(payload.contains("iphone")) host = NetworkStat.HOST_TYPE.IPHONE;
+							else if(payload.contains("ipad")) host = NetworkStat.HOST_TYPE.IPAD;
+							else if(payload.contains("macbook")) {
+								if(payload.contains("air")) host = NetworkStat.HOST_TYPE.AIR;
+								else if(payload.contains("pro")) host = NetworkStat.HOST_TYPE.PRO;
+								else host = NetworkStat.HOST_TYPE.MACBOOK;
+							}
+							else {
+								if(osMap.get(sourceIP)==null) {
+									host = NetworkStat.HOST_TYPE.APPLE;
+								} else {
+									return;
+								}
+							}
+							
+							osMap.put(sourceIP, host);
 						}
 						
-						if(udp.destination() == LLMNR) {
-//							System.out.println("from " + sourceIP + " to " + destinationIP);
-//							System.out.println("from "+  udp.source() + " to " + udp.destination());
-//							System.out.println(sourceIP + ": Microsoft");
-							osMap.put(sourceIP, NetworkStat.HOST_TYPE.MICROSOFT);
+						if(udp.destination() == LLMNR || udp.destination() == SSDP) {
+							osMap.put(sourceIP,  NetworkStat.HOST_TYPE.PC);
 						}
+						
 					}					
-					udpPackets ++;
 				}
 			}  
 		};

@@ -8,7 +8,7 @@ import java.util.HashMap;
 public class QueryVendor {
 	private static HashMap<String, String> vendor = new HashMap<String, String>();
 
-	QueryVendor () {
+	public QueryVendor () {
 		try {
 			BufferedReader br = new BufferedReader(new FileReader("res/vendorlist"));
 			String line;
