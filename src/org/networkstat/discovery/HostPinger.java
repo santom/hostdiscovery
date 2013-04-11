@@ -17,7 +17,7 @@ public class HostPinger implements Runnable{
 		try {
 			InetAddress iaddr = InetAddress.getByName(ipaddress_to_ping);
 //			System.out.println("Checking... " + ipaddress_to_ping + ": " + iaddr.isReachable(2000));
-			iaddr.isReachable(2000);
+			iaddr.isReachable(50);
 			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

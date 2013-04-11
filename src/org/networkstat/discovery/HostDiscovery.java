@@ -26,7 +26,6 @@ public class HostDiscovery {
 				threadPool.execute(hp);
 			}
 		}
-
 	}
 
 }

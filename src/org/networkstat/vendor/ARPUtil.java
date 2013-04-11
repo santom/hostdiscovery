@@ -11,9 +11,9 @@ import org.networkstat.util.OSUtil.OS;
 
 public class ARPUtil {
 
-	private static OS os = OSUtil.getOS();
+	private OS os = OSUtil.getOS();
 	
-	public static HashMap<String, String> readARP() {
+	public HashMap<String, String> readARP() {
 		
 		//assuming this is a linux machine
 		HashMap<String, String> map = new HashMap<String, String>();
@@ -33,7 +33,7 @@ public class ARPUtil {
 							String ip = splitted[0];
 							if (mac.matches("..:..:..:..:..:..") && !mac.equals("00:00:00:00:00:00")) {
 								map.put(ip, mac);
-								System.out.println("IP: " + ip + " MAC: " + mac);
+//								System.out.println("IP: " + ip + " MAC: " + mac);
 							}
 						}
 					}
@@ -57,11 +57,11 @@ public class ARPUtil {
 		return map;
 	}
 	
-	public static void main(String[] args) {
-		
-		QueryVendor qv = new QueryVendor();
-		HashMap<String, String> map = readARP();
-		System.out.println(qv.getVendor("e0:f8:47:17:92:70"));
-	}
+//	public static void main(String[] args) {
+//		
+//		QueryVendor qv = new QueryVendor();
+//		HashMap<String, String> map = readARP();
+//		System.out.println(qv.getVendor("e0:f8:47:17:92:70"));
+//	}
 
 }

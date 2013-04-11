@@ -1,7 +1,6 @@
 package org.networkstat.sniffer;
 
 import java.util.HashMap;
-import java.util.Map.Entry;
 
 import org.jnetpcap.Pcap;
 import org.jnetpcap.PcapBpfProgram;
@@ -13,26 +12,19 @@ import org.jnetpcap.protocol.lan.Ethernet;
 import org.jnetpcap.protocol.network.Ip4;
 import org.jnetpcap.protocol.network.Ip6;
 import org.jnetpcap.protocol.tcpip.Udp;
+import org.networkstat.discovery.NetworkStat;
 
 public class PacketSniffer {
-
-	public enum OS {
-		APPLE,
-		LINUX, 
-		MICROSOFT
-	}
 	
 	private static int MDNS = 5353;
 	private static int LLMNR = 5355;
 
 	
-	public HashMap<String, Integer> startSniffing(String deviceIP, PcapIf device, int packets) {
+	public HashMap<String, NetworkStat.HOST_TYPE> startSniffing(String deviceIP, PcapIf device, int packets) {
 		StringBuilder errbuf = new StringBuilder(); // For any error msgs  
 		
-		final HashMap<String, Integer> osMap = new HashMap<String, Integer>();
-		/*************************************************************************** 
-		 * Second we open up the selected device 
-		 **************************************************************************/  
+		final HashMap<String, NetworkStat.HOST_TYPE> osMap = new HashMap<String, NetworkStat.HOST_TYPE>();
+
 		int snaplen = 64 * 1024;           // Capture all packets, no trucation  
 		int flags = Pcap.MODE_PROMISCUOUS; // capture all packets  
 		int timeout = 10 * 1000;           // 10 seconds in millis  
@@ -42,7 +34,7 @@ public class PacketSniffer {
 		if (pcap == null) {  
 			System.err.printf("Error while opening device for capture: "  
 					+ errbuf.toString());
-			return;
+			return null;
 		}
 
 		PcapBpfProgram program = new PcapBpfProgram();
@@ -53,18 +45,15 @@ public class PacketSniffer {
 
 		if (pcap.compile(program, expression, optimize, netmask) != Pcap.OK) {
 			System.err.println(pcap.getErr());
-			return;
+			return null;
 		}
 
 		if (pcap.setFilter(program) != Pcap.OK) {
 			System.err.println(pcap.getErr());
-			return;		
+			return null;		
 		}
 
-		/*************************************************************************** 
-		 * Third we create a packet handler which will receive packets from the 
-		 * libpcap loop. 
-		 **************************************************************************/  
+
 		final Ethernet eth = new Ethernet();
 		final Ip4 ip4 = new Ip4();
 		final Ip6 ip6 = new Ip6();
@@ -107,14 +96,14 @@ public class PacketSniffer {
 //								e.printStackTrace();
 //							}
 //							System.out.println(sourceIP + ": Apple");
-							osMap.put(sourceIP, OS.APPLE.ordinal());
+							osMap.put(sourceIP, NetworkStat.HOST_TYPE.APPLE);
 						}
 						
 						if(udp.destination() == LLMNR) {
 //							System.out.println("from " + sourceIP + " to " + destinationIP);
 //							System.out.println("from "+  udp.source() + " to " + udp.destination());
 //							System.out.println(sourceIP + ": Microsoft");
-							osMap.put(sourceIP, OS.MICROSOFT.ordinal());
+							osMap.put(sourceIP, NetworkStat.HOST_TYPE.MICROSOFT);
 						}
 					}					
 					udpPackets ++;
@@ -122,25 +111,10 @@ public class PacketSniffer {
 			}  
 		};
 
-		/*************************************************************************** 
-		 * Fourth we enter the loop and tell it to capture 10 packets. The loop 
-		 * method does a mapping of pcap.datalink() DLT value to JProtocol ID, which 
-		 * is needed by JScanner. The scanner scans the packet buffer and decodes 
-		 * the headers. The mapping is done automatically, although a variation on 
-		 * the loop method exists that allows the programmer to sepecify exactly 
-		 * which protocol ID to use as the data link type for this pcap interface. 
-		 **************************************************************************/  
-		pcap.loop(1000, jpacketHandler, "");  
+		pcap.loop(packets, jpacketHandler, "");  
 
-		/*************************************************************************** 
-		 * Last thing to do is close the pcap handle 
-		 **************************************************************************/  
 		pcap.close();
 		
-		//done with sniffing. Now we read the results.
-//		for(Entry<String, Integer> entry: osMap.entrySet()) {
-//			System.out.println(entry.getKey() + ": " + entry.getValue());
-//		}
 		return osMap;
 	}
 	
